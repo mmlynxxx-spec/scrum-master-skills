@@ -1,6 +1,6 @@
 # Agile36 Scrum Master Skill Library
 
-40 skills for the jobs a Scrum Master does every sprint, plus 4 optional ones. Every Scrum event and SAFe event has its own skill. Each one is pinned to the exact version Agile36 reviewed.
+45 skills for the jobs a Scrum Master does every sprint, plus 4 optional ones. Every Scrum event and SAFe event has its own skill. Each one is pinned to the exact version Agile36 reviewed.
 
 ## Scrum events
 
@@ -13,6 +13,16 @@
 | **backlog-refinement** | Backlog Refinement: INVEST checks, vertical splits, Definition of Ready | Beginner | Nothing (optional scorer needs Python 3) |
 | **scrum-of-scrums** | Scrum of Scrums: coordinate 2-5 teams on one product | Beginner | Nothing |
 | **sprint-retrospective** | Retro data pack from git history: velocity, cycle time, churn hotspots | Intermediate | Python 3 + a git repository |
+
+## Sprint planning toolkit
+
+| Skill | Job | Level | Needs |
+|---|---|---|---|
+| **sprint-capacity-analyzer** | Sprint capacity person by person with SAFe normalized points (8 per developer, minus PTO), plus overcommitment risks | Beginner | Team names and PTO days |
+| **planning-readiness-checker** | Pre-flight check of backlog items before sprint planning: scope, acceptance criteria, size, dependencies, testability | Beginner | Nothing (makes a Word report and dashboard when the docx skill is on) |
+| **backlog-refinement-readiness** | Score Jira stories against a 6-point Definition of Ready and draft PO questions and fixes | Beginner | Jira connector (or paste the stories) |
+| **risk-tradeoff-advisor** | Decide what to keep, cut, defer, split or mark as stretch when the sprint has more work than capacity | Intermediate | Nothing (makes a Word report and dashboard when the docx skill is on) |
+| **sprint-plan-summary-builder** | Turn sprint planning outcomes into a shareable summary: goal, committed work, dependencies, risks, capacity and a stakeholder overview | Beginner | Nothing (makes a Word document and dashboard when the docx skill is on) |
 
 ## SAFe
 
@@ -140,6 +150,11 @@ Use a made-up team. Never paste real names or company data into a class exercise
 | backlog-refinement | "Refine this story: 'As an admin I want a reporting dashboard so I can see everything.'" |
 | scrum-of-scrums | "We have 3 teams on one mobile app and they keep breaking each other's releases. How do I set up a Scrum of Scrums?" |
 | sprint-retrospective | "(inside a git repo) Build a retro data pack for the last two weeks." |
+| sprint-capacity-analyzer | "Sprint 12, 2 weeks. Team: Ana, Ben, Chloe, Dev, Eli. Ben is out 3 days, Eli 1 day, and Friday is a holiday for everyone. Candidate backlog is 38 points." |
+| planning-readiness-checker | "Check these stories before planning. 1) 'Improve search performance' (no AC, 8 pts). 2) 'As a user I can export my report to PDF so I can share it' with AC: export button works. 3) 'Integrate with billing API' (13 pts, waiting on Billing team)." |
+| backlog-refinement-readiness | "Check HRT-101 to HRT-105 against our Definition of Ready." |
+| risk-tradeoff-advisor | "We have 32 points planned and 24 points of capacity. Sprint goal: launch self-service password reset. Items: reset flow 8, email templates 5, audit log 5, admin report 8, bug fixes 6." |
+| sprint-plan-summary-builder | "Write up Sprint 12 (Mar 3-14). Goal: customers can reset their own password. Committed: reset flow (8), email templates (5), audit log (5). Stretch: admin report. Ben is out 3 days. Depends on the Identity team's API." |
 | pi-planning | "PI Planning is in two weeks and it's my team's first. What do we need ready?" |
 | art-sync | "Our ART Sync has turned into a 90-minute status meeting. How do I fix it, and what should I bring?" |
 | inspect-and-adapt | "Our team planned 40 business value points and achieved 29. Calculate our predictability and prep the problem-solving workshop." |
@@ -193,6 +208,11 @@ Skills marked *Agile36* were written for this class. Skills from MIT-licensed re
 | backlog-refinement | [borghei/Claude-Skills](https://github.com/borghei/Claude-Skills) | MIT + Commons Clause | author's repo @ `25bf86b` |
 | scrum-of-scrums | [skills-on-ai/skills-on-ai](https://github.com/skills-on-ai/skills-on-ai) | none stated | author's repo @ `e8f587d` |
 | sprint-retrospective | [borghei/Claude-Skills](https://github.com/borghei/Claude-Skills) | MIT + Commons Clause | author's repo @ `25bf86b` |
+| sprint-capacity-analyzer | mmlynxxx-spec | CC BY 4.0 | this repo |
+| planning-readiness-checker | mmlynxxx-spec | CC BY 4.0 | this repo |
+| backlog-refinement-readiness | mmlynxxx-spec | CC BY 4.0 | this repo |
+| risk-tradeoff-advisor | mmlynxxx-spec | CC BY 4.0 | this repo |
+| sprint-plan-summary-builder | mmlynxxx-spec | CC BY 4.0 | this repo |
 | pi-planning | Agile36 | CC BY 4.0 | this repo |
 | art-sync | Agile36 | CC BY 4.0 | this repo |
 | inspect-and-adapt | Agile36 | CC BY 4.0 | this repo |

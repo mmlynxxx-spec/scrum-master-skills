@@ -101,6 +101,71 @@
       "try_prompt": "(inside a git repo) Build a retro data pack for the last two weeks."
     },
     {
+      "install_name": "sprint-capacity-analyzer",
+      "category": "Sprint planning toolkit",
+      "job": "Sprint capacity person by person with SAFe normalized points (8 per developer, minus PTO), plus overcommitment risks",
+      "level": "beginner",
+      "needs": "Team names and PTO days",
+      "source": {
+        "local": "skills/sprint-capacity-analyzer"
+      },
+      "license": "CC BY 4.0",
+      "try_prompt": "Sprint 12, 2 weeks. Team: Ana, Ben, Chloe, Dev, Eli. Ben is out 3 days, Eli 1 day, and Friday is a holiday for everyone. Candidate backlog is 38 points.",
+      "author": "mmlynxxx-spec"
+    },
+    {
+      "install_name": "planning-readiness-checker",
+      "category": "Sprint planning toolkit",
+      "job": "Pre-flight check of backlog items before sprint planning: scope, acceptance criteria, size, dependencies, testability",
+      "level": "beginner",
+      "needs": "Nothing (makes a Word report and dashboard when the docx skill is on)",
+      "source": {
+        "local": "skills/planning-readiness-checker"
+      },
+      "license": "CC BY 4.0",
+      "try_prompt": "Check these stories before planning. 1) 'Improve search performance' (no AC, 8 pts). 2) 'As a user I can export my report to PDF so I can share it' with AC: export button works. 3) 'Integrate with billing API' (13 pts, waiting on Billing team).",
+      "author": "mmlynxxx-spec"
+    },
+    {
+      "install_name": "backlog-refinement-readiness",
+      "category": "Sprint planning toolkit",
+      "job": "Score Jira stories against a 6-point Definition of Ready and draft PO questions and fixes",
+      "level": "beginner",
+      "needs": "Jira connector (or paste the stories)",
+      "source": {
+        "local": "skills/backlog-refinement-readiness"
+      },
+      "license": "CC BY 4.0",
+      "try_prompt": "Check HRT-101 to HRT-105 against our Definition of Ready.",
+      "author": "mmlynxxx-spec"
+    },
+    {
+      "install_name": "risk-tradeoff-advisor",
+      "category": "Sprint planning toolkit",
+      "job": "Decide what to keep, cut, defer, split or mark as stretch when the sprint has more work than capacity",
+      "level": "intermediate",
+      "needs": "Nothing (makes a Word report and dashboard when the docx skill is on)",
+      "source": {
+        "local": "skills/risk-tradeoff-advisor"
+      },
+      "license": "CC BY 4.0",
+      "try_prompt": "We have 32 points planned and 24 points of capacity. Sprint goal: launch self-service password reset. Items: reset flow 8, email templates 5, audit log 5, admin report 8, bug fixes 6.",
+      "author": "mmlynxxx-spec"
+    },
+    {
+      "install_name": "sprint-plan-summary-builder",
+      "category": "Sprint planning toolkit",
+      "job": "Turn sprint planning outcomes into a shareable summary: goal, committed work, dependencies, risks, capacity and a stakeholder overview",
+      "level": "beginner",
+      "needs": "Nothing (makes a Word document and dashboard when the docx skill is on)",
+      "source": {
+        "local": "skills/sprint-plan-summary-builder"
+      },
+      "license": "CC BY 4.0",
+      "try_prompt": "Write up Sprint 12 (Mar 3-14). Goal: customers can reset their own password. Committed: reset flow (8), email templates (5), audit log (5). Stretch: admin report. Ben is out 3 days. Depends on the Identity team's API.",
+      "author": "mmlynxxx-spec"
+    },
+    {
       "install_name": "pi-planning",
       "category": "SAFe",
       "job": "Prepare a team for PI Planning: capacity, PI objectives, dependencies, ROAM, confidence vote",

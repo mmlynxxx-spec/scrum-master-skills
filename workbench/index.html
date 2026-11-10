@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scrum Master Workbench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<script src="/vendor/marked.min.js"></script>
+<script src="/vendor/purify.min.js"></script>
+<style>
+/* Layout: two panes. Left: searchable skill list grouped by category. Right: the chosen skill, with Chat and Skill-text tabs. Agile36 palette from site/library.html. */
+:root {
+  --bg: #f6f9fd; --surface: #ffffff; --ink: #1f2c4a; --body: #475569; --muted: #64748b;
+  --line: rgba(31, 44, 74, 0.12); --tint: rgba(31, 44, 74, 0.045);
+  --accent: #d97706; --accent-soft: rgba(217, 119, 6, 0.10);
+  --lvl-beg: #0f766e; --lvl-beg-bg: rgba(15, 118, 110, 0.10);
+  --lvl-int: #1d4ed8; --lvl-int-bg: rgba(29, 78, 216, 0.09);
+  --lvl-adv: #7c2d92; --lvl-adv-bg: rgba(124, 45, 146, 0.09);
+  --danger: #b91c1c; --danger-bg: rgba(185, 28, 28, 0.08);
+  --code-bg: #1f2c4a; --code-fg: #f1f5f9;
+  --sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1424; --surface: #141d32; --ink: #e8edf6; --body: #b6c0d1; --muted: #8a96ab;
+    --line: rgba(232, 237, 246, 0.12); --tint: rgba(232, 237, 246, 0.05);
+    --accent: #f59e0b; --accent-soft: rgba(245, 158, 11, 0.13);
+    --lvl-beg: #5eead4; --lvl-beg-bg: rgba(94, 234, 212, 0.12);
+    --lvl-int: #93b4ff; --lvl-int-bg: rgba(147, 180, 255, 0.13);
+    --lvl-adv: #e0a3f0; --lvl-adv-bg: rgba(224, 163, 240, 0.13);
+    --danger: #fca5a5; --danger-bg: rgba(252, 165, 165, 0.10);
+    --code-bg: #0a101d; --code-fg: #e8edf6;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1424; --surface: #141d32; --ink: #e8edf6; --body: #b6c0d1; --muted: #8a96ab;
+  --line: rgba(232, 237, 246, 0.12); --tint: rgba(232, 237, 246, 0.05);
+  --accent: #f59e0b; --accent-soft: rgba(245, 158, 11, 0.13);
+  --lvl-beg: #5eead4; --lvl-beg-bg: rgba(94, 234, 212, 0.12);
+  --lvl-int: #93b4ff; --lvl-int-bg: rgba(147, 180, 255, 0.13);
+  --lvl-adv: #e0a3f0; --lvl-adv-bg: rgba(224, 163, 240, 0.13);
+  --danger: #fca5a5; --danger-bg: rgba(252, 165, 165, 0.10);
+  --code-bg: #0a101d; --code-fg: #e8edf6;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--body); font-family: var(--sans); font-size: 15px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { color: var(--ink); font-weight: 500; letter-spacing: -0.02em; margin: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+a { color: var(--accent); text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+.mono { font-family: var(--mono); }
+
+.app { display: grid; grid-template-columns: 320px minmax(0, 1fr); height: 100vh; }
+
+/* sidebar */
+aside { border-right: 1px solid var(--line); background: var(--surface); display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+.brand { padding: 18px 18px 12px; display: flex; flex-direction: column; gap: 2px; }
+.brand .eyebrow { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.brand h1 { font-size: 1.2rem; }
+.search { margin: 0 18px 10px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+.search::placeholder { color: var(--muted); }
+.list { overflow-y: auto; padding: 0 10px 18px; flex: 1; }
+.cat-label { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 14px 8px 6px; }
+.item { display: flex; flex-direction: column; gap: 1px; width: 100%; text-align: left; background: none; border: 0; border-radius: 8px; padding: 7px 8px; }
+.item:hover { background: var(--tint); }
+.item[aria-current="true"] { background: var(--accent-soft); }
+.item .nm { font-family: var(--mono); font-size: 0.84rem; color: var(--ink); }
+.item .jb { font-size: 0.78rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.empty { color: var(--muted); padding: 14px 8px; font-size: 0.88rem; }
+
+/* main */
+main { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+.keybar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 24px; border-bottom: 1px solid var(--line); background: var(--accent-soft); font-size: 0.88rem; }
+.keybar[hidden] { display: none; }
+.keybar input[type=password] { flex: 1; min-width: 200px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+.keybar label { display: flex; align-items: center; gap: 6px; color: var(--muted); }
+.head { padding: 20px 24px 0; display: flex; flex-direction: column; gap: 8px; }
+.head-top { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.head h2 { font-family: var(--mono); font-size: 1.3rem; letter-spacing: -0.01em; }
+.job { color: var(--body); max-width: 80ch; }
+.meta { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 0.82rem; color: var(--muted); }
+.meta b { color: var(--ink); font-weight: 500; }
+.chip { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
+.chip.beginner { color: var(--lvl-beg); background: var(--lvl-beg-bg); }
+.chip.intermediate { color: var(--lvl-int); background: var(--lvl-int-bg); }
+.chip.advanced { color: var(--lvl-adv); background: var(--lvl-adv-bg); }
+.chip.plain { color: var(--muted); background: var(--tint); }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); padding: 0 24px; margin-top: 14px; }
+.tab { background: none; border: 0; padding: 9px 12px; color: var(--muted); font-weight: 500; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+.tab-spacer { flex: 1; }
+.btn { background: var(--surface); border: 1px solid var(--line); border-radius: 7px; padding: 5px 12px; font-size: 0.84rem; font-weight: 500; color: var(--ink); }
+.btn:hover:not(:disabled) { border-color: var(--accent); }
+.btn:disabled { opacity: 0.5; cursor: default; }
+.btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.btn.done { color: var(--accent); border-color: var(--accent); }
+.tabs .btn { align-self: center; }
+
+.pane { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.pane[hidden] { display: none; }
+
+/* chat */
+.thread { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 18px; }
+.welcome { max-width: 70ch; display: flex; flex-direction: column; gap: 12px; color: var(--muted); }
+.try { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.try .lbl { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.try q { color: var(--ink); }
+.msg { max-width: 82ch; display: flex; flex-direction: column; gap: 4px; }
+.msg .who { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.msg.user { align-self: flex-end; }
+.msg.user .bubble { background: var(--ink); color: var(--bg); border-radius: 12px 12px 4px 12px; padding: 10px 14px; white-space: pre-wrap; }
+.msg.assistant .bubble { background: var(--surface); border: 1px solid var(--line); border-radius: 12px 12px 12px 4px; padding: 4px 16px; min-width: 0; overflow-x: auto; }
+.msg .foot { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); display: flex; gap: 12px; align-items: center; }
+.msg .foot button { background: none; border: 0; padding: 0; color: var(--muted); font: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.notice { font-size: 0.85rem; color: var(--accent); }
+.err { font-size: 0.88rem; color: var(--danger); background: var(--danger-bg); border-radius: 8px; padding: 8px 12px; max-width: 82ch; }
+.typing::after { content: "▍"; animation: blink 1s steps(1) infinite; color: var(--accent); }
+@keyframes blink { 50% { opacity: 0; } }
+
+.composer { border-top: 1px solid var(--line); padding: 12px 24px 16px; display: flex; flex-direction: column; gap: 8px; background: var(--bg); }
+.composer textarea { width: 100%; min-height: 72px; max-height: 40vh; resize: vertical; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 0.84rem; }
+.controls select { padding: 4px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+.controls .grow { flex: 1; }
+.controls .hint { color: var(--muted); font-size: 0.78rem; }
+
+/* markdown */
+.md { color: var(--body); }
+.md h1, .md h2, .md h3, .md h4 { margin: 1.1em 0 0.4em; line-height: 1.25; }
+.md h1 { font-size: 1.35rem; } .md h2 { font-size: 1.15rem; } .md h3 { font-size: 1.02rem; } .md h4 { font-size: 0.95rem; }
+.md p, .md ul, .md ol, .md blockquote, .md pre, .md table { margin: 0.6em 0; }
+.md ul, .md ol { padding-left: 1.4em; }
+.md li + li { margin-top: 0.2em; }
+.md strong { color: var(--ink); font-weight: 600; }
+.md code { font-family: var(--mono); font-size: 0.86em; background: var(--tint); padding: 1px 5px; border-radius: 4px; }
+.md pre { background: var(--code-bg); color: var(--code-fg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; }
+.md pre code { background: none; padding: 0; color: inherit; }
+.md blockquote { border-left: 3px solid var(--accent); padding-left: 12px; color: var(--muted); }
+.md table { border-collapse: collapse; display: block; overflow-x: auto; }
+.md th, .md td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+.md th { background: var(--tint); color: var(--ink); font-weight: 500; }
+.md hr { border: 0; border-top: 1px solid var(--line); margin: 1.2em 0; }
+.plain-md { white-space: pre-wrap; }
+
+.doc { flex: 1; overflow-y: auto; padding: 8px 24px 32px; }
+.doc .md { max-width: 82ch; }
+.doc .note { font-size: 0.85rem; color: var(--muted); margin: 14px 0 0; max-width: 82ch; }
+.loading { color: var(--muted); padding: 20px 24px; }
+
+@media (max-width: 860px) {
+  .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; height: auto; min-height: 100vh; }
+  aside { border-right: 0; border-bottom: 1px solid var(--line); max-height: 42vh; }
+  main { min-height: 70vh; }
+  .head, .thread, .composer, .doc, .keybar { padding-left: 16px; padding-right: 16px; }
+  .tabs { padding: 0 16px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand">
+      <span class="eyebrow">Agile36 skill library</span>
+      <h1>Scrum Master Workbench</h1>
+    </div>
+    <input class="search" id="search" type="search" placeholder="Search skills (e.g. retro, capacity)" aria-label="Search skills">
+    <nav class="list" id="list" aria-label="Skills"></nav>
+  </aside>
+
+  <main>
+    <div class="keybar" id="keybar" hidden>
+      <span id="keymsg">Add an Anthropic API key to chat with the skills.</span>
+      <input type="password" id="keyinput" placeholder="sk-ant-..." autocomplete="off" aria-label="Anthropic API key">
+      <label><input type="checkbox" id="keyremember" checked> Remember on this computer</label>
+      <button class="btn primary" id="keysave">Save key</button>
+    </div>
+
+    <div class="head" id="head"><p class="loading">Loading the library…</p></div>
+
+    <div class="tabs" role="tablist" id="tabs" hidden>
+      <button class="tab" role="tab" id="tab-chat" aria-selected="true">Chat</button>
+      <button class="tab" role="tab" id="tab-doc" aria-selected="false">Skill text</button>
+      <span class="tab-spacer"></span>
+      <button class="btn" id="copyplain" title="Copies the full skill as text you can paste into ChatGPT, Copilot Chat or claude.ai">Copy for another chat tool</button>
+    </div>
+
+    <section class="pane" id="pane-chat" hidden>
+      <div class="thread" id="thread" aria-live="polite"></div>
+      <div class="composer">
+        <textarea id="input" placeholder="Describe your situation. Ctrl+Enter (⌘+Enter on Mac) to send."></textarea>
+        <div class="controls">
+          <button class="btn primary" id="send">Send</button>
+          <button class="btn" id="newchat">New chat</button>
+          <span class="grow"></span>
+          <label>Model <select id="model"></select></label>
+          <label title="How hard Claude thinks. Higher is slower and costs more.">Effort <select id="effort"></select></label>
+        </div>
+      </div>
+    </section>
+
+    <section class="pane" id="pane-doc" hidden>
+      <div class="doc" id="doc"></div>
+    </section>
+  </main>
+</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+  };
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const renderMd = (text) => {
+    if (window.marked && window.DOMPurify) {
+      return DOMPurify.sanitize(marked.parse(text, { gfm: true, breaks: false }));
+    }
+    return `<div class="plain-md">${esc(text)}</div>`;
+  };
+
+  let lib = null, current = null, keyState = "missing", busy = false;
+  const skillCache = {};          // name -> {markdown, plain, ...}
+  const chats = {};               // name -> {conv_id, items: [{role, text, foot, notice, error}]}
+
+  async function init() {
+    const r = await fetch("/api/library");
+    lib = await r.json();
+    keyState = lib.key;
+    for (const m of lib.models) $("model").add(new Option(m.label, m.id));
+    for (const e of lib.efforts) $("effort").add(new Option(e, e));
+    $("model").value = store.get("wb.model") || lib.models[0].id;
+    $("effort").value = store.get("wb.effort") || "medium";
+    renderKeybar();
+    renderList();
+    const last = store.get("wb.skill");
+    select(lib.skills.find((s) => s.name === last) ? last : lib.skills[0].name);
+  }
+
+  function renderKeybar() {
+    const bar = $("keybar");
+    if (keyState === "no-sdk") {
+      bar.hidden = false;
+      bar.innerHTML = `<span>Chat is off because the Anthropic SDK isn't installed. In a terminal run <code class="mono">pip install anthropic</code>, then restart the workbench. You can still read and copy every skill.</span>`;
+    } else {
+      bar.hidden = keyState !== "missing";
+    }
+  }
+
+  function renderList() {
+    const q = $("search").value.trim().toLowerCase();
+    const list = $("list");
+    list.innerHTML = "";
+    let cat = null, shown = 0;
+    for (const s of lib.skills) {
+      const hay = `${s.name} ${s.job} ${s.category}`.toLowerCase();
+      if (q && !q.split(/\s+/).every((w) => hay.includes(w))) continue;
+      if (s.category !== cat) {
+        cat = s.category;
+        const h = document.createElement("div");
+        h.className = "cat-label";
+        h.textContent = cat;
+        list.appendChild(h);
+      }
+      const b = document.createElement("button");
+      b.className = "item";
+      b.dataset.name = s.name;
+      if (current && current.name === s.name) b.setAttribute("aria-current", "true");
+      b.innerHTML = `<span class="nm">${esc(s.name)}</span><span class="jb">${esc(s.job)}</span>`;
+      b.title = s.job;
+      b.onclick = () => select(s.name);
+      list.appendChild(b);
+      shown++;
+    }
+    if (!shown) list.innerHTML = `<p class="empty">No skills match “${esc(q)}”.</p>`;
+  }
+
+  function select(name) {
+    current = lib.skills.find((s) => s.name === name);
+    store.set("wb.skill", name);
+    document.querySelectorAll(".item").forEach((el) => el.toggleAttribute("aria-current", el.dataset.name === name));
+    if (!chats[name]) chats[name] = { conv_id: null, items: [] };
+    const s = current;
+    const author = s.local ? (s.author || "in this repo") : `<a href="${esc(s.source_url)}" target="_blank" rel="noopener">${esc(s.author)}</a>`;
+    $("head").innerHTML = `
+      <div class="head-top">
+        <h2>${esc(s.name)}</h2>
+        <span class="chip ${esc(s.level)}">${esc(s.level)}</span>
+        ${s.optional ? '<span class="chip plain">optional</span>' : ""}
+        <span class="chip plain">${esc(s.category)}</span>
+      </div>
+      <p class="job">${esc(s.job)}</p>
+      <div class="meta">
+        <span><b>Needs</b> ${esc(s.needs)}</span>
+        <span><b>By</b> ${author}</span>
+        <span><b>License</b> ${esc(s.license)}</span>
+      </div>`;
+    $("tabs").hidden = false;
+    renderThread();
+    showTab(store.get("wb.tab") === "doc" ? "doc" : "chat");
+    $("doc").innerHTML = "";
+    if (window.innerWidth <= 860) $("head").scrollIntoView({ behavior: "smooth" });
+  }
+
+  async function getSkill(name) {
+    if (skillCache[name]) return skillCache[name];
+    const r = await fetch(`/api/skill/${encodeURIComponent(name)}`);
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || "Couldn't load skill");
+    skillCache[name] = d;
+    return d;
+  }
+
+  function showTab(which) {
+    store.set("wb.tab", which);
+    $("tab-chat").setAttribute("aria-selected", which === "chat");
+    $("tab-doc").setAttribute("aria-selected", which === "doc");
+    $("pane-chat").hidden = which !== "chat";
+    $("pane-doc").hidden = which !== "doc";
+    if (which === "doc") loadDoc();
+    else $("input").focus({ preventScroll: true });
+  }
+
+  async function loadDoc() {
+    const name = current.name;
+    const doc = $("doc");
+    if (doc.dataset.name === name && doc.innerHTML) return;
+    doc.dataset.name = name;
+    doc.innerHTML = `<p class="loading">${current.local ? "Loading…" : "Downloading from the author's GitHub repo at the reviewed version…"}</p>`;
+    try {
+      const d = await getSkill(name);
+      if (current.name !== name) return;
+      doc.innerHTML = `<p class="note">${esc(d.description)}</p>` +
+        (d.has_scripts ? `<p class="note">This skill also ships Python scripts. They don't run here; install the skill into Claude Code to use them.</p>` : "") +
+        `<div class="md">${renderMd(d.markdown)}</div>`;
+    } catch (e) {
+      doc.innerHTML = `<p class="err">${esc(e.message)}</p>`;
+    }
+  }
+
+  function renderThread() {
+    const t = $("thread");
+    const chat = chats[current.name];
+    t.innerHTML = "";
+    if (!chat.items.length) {
+      const w = document.createElement("div");
+      w.className = "welcome";
+      w.innerHTML = `<p>Claude will follow the <b>${esc(current.name)}</b> skill for this chat. Give it your real situation: team size, dates, what's going wrong.</p>` +
+        (current.try_prompt ? `<div class="try"><span class="lbl">Try this</span><q>${esc(current.try_prompt)}</q><div><button class="btn" id="usetry">Use this prompt</button></div></div>` : "") +
+        (current.local ? "" : `<p>This skill comes from another author, so the first message downloads it from GitHub.</p>`);
+      t.appendChild(w);
+      const u = $("usetry");
+      if (u) u.onclick = () => { $("input").value = current.try_prompt; $("input").focus(); };
+    }
+    for (const it of chat.items) t.appendChild(renderItem(it));
+    t.scrollTop = t.scrollHeight;
+  }
+
+  function renderItem(it) {
+    if (it.error) {
+      const e = document.createElement("div");
+      e.className = "err";
+      e.textContent = it.error;
+      return e;
+    }
+    const m = document.createElement("div");
+    m.className = `msg ${it.role}`;
+    if (it.role === "user") {
+      m.innerHTML = `<div class="bubble"></div>`;
+      m.querySelector(".bubble").textContent = it.text;
+    } else {
+      m.innerHTML = `<span class="who">Claude</span><div class="bubble md${it.streaming ? " typing" : ""}">${renderMd(it.text || "")}</div>` +
+        (it.notice ? `<div class="notice">${esc(it.notice)}</div>` : "") +
+        (it.streaming ? "" : `<div class="foot"><button data-copy>Copy answer</button>${it.foot ? `<span>${esc(it.foot)}</span>` : ""}</div>`);
+      const c = m.querySelector("[data-copy]");
+      if (c) c.onclick = () => copy(it.text, c, "Copied");
+    }
+    it.el = m;
+    return m;
+  }
+
+  async function send() {
+    const text = $("input").value.trim();
+    if (!text || busy) return;
+    if (keyState === "no-sdk") return;
+    const name = current.name;
+    const chat = chats[name];
+    busy = true; $("send").disabled = true;
+    $("input").value = "";
+    chat.items.push({ role: "user", text });
+    const reply = { role: "assistant", text: "", streaming: true };
+    chat.items.push(reply);
+    renderThread();
+    const t = $("thread");
+    let pending = false;
+    const repaint = () => {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(() => {
+        pending = false;
+        if (current.name !== name || !reply.el) return;
+        const atBottom = t.scrollHeight - t.scrollTop - t.clientHeight < 80;
+        reply.el.querySelector(".bubble").innerHTML = renderMd(reply.text);
+        if (atBottom) t.scrollTop = t.scrollHeight;
+      });
+    };
+    try {
+      const r = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ skill: name, message: text, conv_id: chat.conv_id, model: $("model").value, effort: $("effort").value }),
+      });
+      if (!r.ok || !(r.headers.get("Content-Type") || "").includes("ndjson")) {
+        const d = await r.json().catch(() => ({}));
+        throw new Error(d.error || `Request failed (${r.status})`);
+      }
+      const reader = r.body.getReader();
+      const dec = new TextDecoder();
+      let buf = "";
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
+        let i;
+        while ((i = buf.indexOf("\n")) >= 0) {
+          const line = buf.slice(0, i); buf = buf.slice(i + 1);
+          if (!line.trim()) continue;
+          const ev = JSON.parse(line);
+          if (ev.t === "start") chat.conv_id = ev.conv_id;
+          else if (ev.t === "text") { reply.text += ev.v; repaint(); }
+          else if (ev.t === "notice") reply.notice = ev.v;
+          else if (ev.t === "error") throw new Error(ev.v);
+          else if (ev.t === "done") {
+            const u = ev.usage;
+            reply.foot = `${ev.model} · ${u.in + u.cache_read} in${u.cache_read ? ` (${u.cache_read} cached)` : ""} · ${u.out} out`;
+          }
+        }
+      }
+      reply.streaming = false;
+      if (!reply.text && !reply.notice) reply.notice = "No answer came back.";
+    } catch (e) {
+      reply.streaming = false;
+      if (!reply.text) chat.items.pop();
+      chat.items.push({ error: e.message });
+      if (/API key/i.test(e.message)) { keyState = "missing"; renderKeybar(); }
+    } finally {
+      busy = false; $("send").disabled = false;
+      if (current.name === name) renderThread();
+    }
+  }
+
+  async function newChat() {
+    const chat = chats[current.name];
+    if (chat.conv_id) fetch("/api/reset", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ conv_id: chat.conv_id }) });
+    chats[current.name] = { conv_id: null, items: [] };
+    renderThread();
+    $("input").focus();
+  }
+
+  async function copy(text, btn, label) {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      document.execCommand("copy"); ta.remove();
+    }
+    const old = btn.textContent;
+    btn.textContent = label; btn.classList.add("done");
+    setTimeout(() => { btn.textContent = old; btn.classList.remove("done"); }, 1600);
+  }
+
+  async function saveKey() {
+    const key = $("keyinput").value.trim();
+    if (!key) return;
+    const r = await fetch("/api/key", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key, remember: $("keyremember").checked }) });
+    const d = await r.json();
+    keyState = d.key || keyState;
+    $("keyinput").value = "";
+    renderKeybar();
+  }
+
+  $("search").addEventListener("input", renderList);
+  $("tab-chat").onclick = () => showTab("chat");
+  $("tab-doc").onclick = () => showTab("doc");
+  $("send").onclick = send;
+  $("newchat").onclick = newChat;
+  $("keysave").onclick = saveKey;
+  $("keyinput").addEventListener("keydown", (e) => { if (e.key === "Enter") saveKey(); });
+  $("model").onchange = () => store.set("wb.model", $("model").value);
+  $("effort").onchange = () => store.set("wb.effort", $("effort").value);
+  $("input").addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); send(); } });
+  $("copyplain").onclick = async () => {
+    const btn = $("copyplain");
+    try { const d = await getSkill(current.name); copy(d.plain, btn, "Copied: paste it into your chat tool"); }
+    catch (e) { btn.textContent = "Couldn't load"; }
+  };
+  init().catch((e) => { $("head").innerHTML = `<p class="err">Couldn't load the library: ${esc(e.message)}. Is the workbench server still running?</p>`; });
+})();
+</script>
+</body>
+</html>
